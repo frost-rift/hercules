@@ -59,7 +59,7 @@ namespace Hercules.AI
         {
             if (core.Project.Database.Documents.TryGetValue(id, out var doc))
             {
-                return doc.Json.ToString();
+                return doc.DraftJson.ToString();
             }
             return $"Document {id} not found";
         }
@@ -72,7 +72,7 @@ namespace Hercules.AI
             {
                 if (core.Project.Database.Documents.TryGetValue(id, out var doc))
                 {
-                    result.Add(doc.Json.ToString());
+                    result.Add(doc.DraftJson.ToString());
                 }
             }
             return string.Join(Environment.NewLine, result);
@@ -137,6 +137,7 @@ namespace Hercules.AI
                 SearchFields = false,
                 MatchCase = false,
                 WholeWord = false,
+                SearchDraft = true,
             };
             search.Search(core.Project.SchemafulDatabase.Schema, core.Project.SchemafulDatabase.SchemafulDocuments);
             if (search.Results.Documents.Count == 0)
@@ -176,7 +177,7 @@ namespace Hercules.AI
                     foreach (var jsonPropertyPath in jsonPropertyPaths)
                     {
                         var path = LooseParseJsonPath(jsonPropertyPath);
-                        if (doc.Json.TryFetch(path, out var value))
+                        if (doc.DraftJson.TryFetch(path, out var value))
                             obj[jsonPropertyPath] = value?.ToString() ?? "null";
                     }
                 }

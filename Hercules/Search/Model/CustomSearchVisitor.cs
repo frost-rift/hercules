@@ -16,6 +16,7 @@ namespace Hercules.Search
         public bool SearchFields { get; set; }
         public bool MatchCase { get; set; }
         public bool WholeWord { get; set; }
+        public bool SearchDraft { get; set; }
 
         string? documentId;
         double? number;
@@ -47,7 +48,7 @@ namespace Hercules.Search
                 if (SearchKeys && MatchString(documentId))
                     Results.AddDocument(documentId);
                 var search = new SchemaJsonSearch(this);
-                search.Visit(JsonPath.Empty, doc.Json, schema.RootType); // TODO: FIXME
+                search.Visit(JsonPath.Empty, SearchDraft ? doc.DraftJson : doc.Json, schema.RootType); // TODO: FIXME
             }
         }
 

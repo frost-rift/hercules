@@ -51,6 +51,7 @@ namespace Hercules.Documents.Editor
         private bool enabled = true;
         private readonly ObservableValue<bool> originalIsDirty = new(false);
         private readonly IReadOnlyObservableValue<bool> isModified;
+        public ImmutableJsonObject DraftJson => FormTab.DraftJson;
 
         public DocumentEditorPage(DocumentEditorContext context, IDocument document)
         {

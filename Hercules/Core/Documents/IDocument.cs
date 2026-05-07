@@ -8,6 +8,7 @@ namespace Hercules.Documents
 {
     public interface IDocumentEditor
     {
+        ImmutableJsonObject DraftJson { get; }
         DocumentDraft GetDocumentDraft();
         void UserDeleting();
         void UserDeleteFailed();
@@ -53,5 +54,7 @@ namespace Hercules.Documents
         IDocumentEditor? Editor { get; }
         DocumentPreview Preview { get; }
         public event DocumentChanged? OnChanged;
+
+        public ImmutableJsonObject DraftJson => Editor?.DraftJson ?? Json;
     }
 }
