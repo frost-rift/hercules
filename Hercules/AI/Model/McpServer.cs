@@ -18,34 +18,36 @@ namespace Hercules.AI
 
         public async Task RunMcpAsync(CancellationToken ct = default)
         {
-            var serverOptions = new McpServerOptions();
-            serverOptions.ServerInfo = new ModelContextProtocol.Protocol.Implementation { Name = "Hercules", Version = Core.GetVersion().ToString(), Title = "Hercules design data database" };
-            serverOptions.ServerInstructions = "Hercules is the database of JSON design documents. Each document describes a single ingame entity. Important properties: _id property is unique string id; category property is the document type. Which other properties are available for each category is defined by a special schema document.";
-            serverOptions.Capabilities = new ModelContextProtocol.Protocol.ServerCapabilities();
-            serverOptions.Capabilities.Tools = new()
+            var serverOptions = new McpServerOptions
             {
-                ListChanged = true,
-                ToolCollection = []
-            };
-            var mcpTools =
-                from methodIndo in tools.GetType().GetMethods()
-                let attr = methodIndo.GetCustomAttribute<AiToolAttribute>()
-                where attr != null
-                select McpServerTool.Create(ReflectionHelper.CreateDelegate(methodIndo, tools), new()
+                ServerInfo = new ModelContextProtocol.Protocol.Implementation
                 {
-                    Name = methodIndo.Name,
+                    Name = "Hercules",
+                    Version = Core.GetVersion().ToString(),
+                    Title = "Hercules design data database"
+                },
+                ServerInstructions = "Hercules is the database of JSON design documents. Each document describes a single ingame entity. Important properties: _id property is unique string id; category property is the document type. Which other properties are available for each category is defined by a special schema document."
+            };
+
+            var mcpTools =
+                from methodInfo in tools.GetType().GetMethods()
+                let attr = methodInfo.GetCustomAttribute<AiToolAttribute>()
+                where attr != null
+                select McpServerTool.Create(ReflectionHelper.CreateDelegate(methodInfo, tools), new McpServerToolCreateOptions
+                {
+                    Name = methodInfo.Name,
                     Description = attr.GetDescription(tools),
                     ReadOnly = attr.ReadOnly,
                     Destructive = attr.Destructive,
                     OpenWorld = attr.OpenWorld,
                 });
+
             foreach (var tool in mcpTools)
-                serverOptions.Capabilities.Tools.ToolCollection.Add(tool);
+                serverOptions.ToolCollection.Add(tool);
 
             var loggerFactory = new HerculesLoggerFactory();
-            // Create and run server with stdio transport
             await using var stdioTransport = new StdioServerTransport(serverOptions, loggerFactory);
-            var server = McpServerFactory.Create(stdioTransport, serverOptions, loggerFactory);
+            var server = ModelContextProtocol.Server.McpServer.Create(stdioTransport, serverOptions, loggerFactory, null);
             await server.RunAsync(ct);
         }
     }
